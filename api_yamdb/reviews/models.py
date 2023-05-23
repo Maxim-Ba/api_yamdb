@@ -41,7 +41,7 @@ class Title(models.Model):
     )
     description = models.CharField(
         'Описание произведения',
-        max_length=256
+        max_length=300
     )
     year = models.IntegerField(
         'Год выпуска произведения'
