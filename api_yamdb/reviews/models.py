@@ -1,13 +1,8 @@
-# from datetime import datetime, timedelta
-
-# import jwt
 from rest_framework_simplejwt.tokens import AccessToken
 
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
-# from django.conf import settings
 
 
 ROLES = (
@@ -39,13 +34,5 @@ class User(AbstractUser):
         Генерирует веб-токен JSON, в котором хранится идентификатор этого
         пользователя, срок действия токена составляет 1 день от создания
         """
-        # dt = datetime.now() + timedelta(days=1)
-
-        # token = jwt.encode(
-        #     {"id": self.pk, "exp": int(dt.timestamp())},
-        #     settings.SECRET_KEY,
-        #     algorithm="HS256",
-        # )
-
-        # return token.encode("utf-8")
-        return AccessToken.for_user(self)
+        access = AccessToken.for_user(self)
+        return str(access)

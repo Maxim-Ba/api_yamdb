@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 
 from reviews.models import User
 from .permissions import IsAdmin
@@ -33,4 +34,26 @@ def token(request):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+    pagination_class = PageNumberPagination
+
+    def retrieve(self, request, pk=None):
+        # не понял как переименовать pk, который в self.kwargs, в username
+        user = self.get_user_by_username(self.kwargs)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    def partial_update(self, request, pk=None):
+        user = self.get_user_by_username(self.kwargs)
+        print(request.data)
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_user_by_username(self, kwargs):
+        print(kwargs)
+        username = kwargs.get("pk")
+        return get_object_or_404(User, username=username)

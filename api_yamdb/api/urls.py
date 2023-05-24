@@ -6,6 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .views import UserViewSet, signup, token
 
 router_v1 = routers.SimpleRouter()
+# router_v1.register(
+#     r"users/(?P<username>\w+)/", UserViewSet, basename="user-retrieve"
+# )
 router_v1.register(r"users", UserViewSet, basename="users")
 
 
