@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions, status
-from rest_framework.response import Response  # Импортировали класс Response
-from rest_framework.decorators import api_view  # Импортировали декоратор
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 
 from reviews.models import User
