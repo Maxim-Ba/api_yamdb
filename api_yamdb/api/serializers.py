@@ -1,7 +1,6 @@
 import re
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 from django.core.validators import validate_email
 
@@ -19,7 +18,6 @@ class UserSerializer(serializers.ModelSerializer):
             "role",
         ]
         model = User
-        validators = [UniqueValidator(queryset=User.objects.all())]
 
         def validate_username(self, value):
             return _validate_username(self, value)

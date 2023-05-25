@@ -36,24 +36,37 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [
         permissions.IsAuthenticated,
+        IsAdmin,
     ]
     pagination_class = PageNumberPagination
+    lookup_field = "username"
 
-    def retrieve(self, request, pk=None):
-        # не понял как переименовать pk, который в self.kwargs, в username
-        user = self.get_user_by_username(self.kwargs)
-        serializer = UserSerializer(user)
+
+# class MeViewSet(generics.RetrieveUpdateAPIView):
+#     serializer_class = UserSerializer
+#     lookup_field = "username"
+#     permission_classes = [
+#         permissions.IsAuthenticated,
+#     ]
+#     queryset = User.objects.all()
+
+
+#     @action(methods=["GET"], detail=True, url_path="v1/users/me/")
+#     def me(self, username=None):
+#         print("333", self.request.user.get_username())
+#         # user = get_object_or_404(User, username=self.request.user)
+#         username = self.request.user.get_username
+#         return self.retrieve(self.request, username=username)
+@api_view(
+    ["GET", "PATCH"],
+)
+def me(request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    if request.method == "GET":
+        serializer = UserSerializer(request.user)
         return Response(serializer.data)
-
-    def partial_update(self, request, pk=None):
-        user = self.get_user_by_username(self.kwargs)
-        print(request.data)
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        serializer.is_valid()
-        serializer.save()
-        return Response(serializer.data)
-
-    def get_user_by_username(self, kwargs):
-        print(kwargs)
-        username = kwargs.get("pk")
-        return get_object_or_404(User, username=username)
+    serializer = UserSerializer(request.user, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)
