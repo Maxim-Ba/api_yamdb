@@ -1,11 +1,11 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, filters
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 
 from reviews.models import User
-from .permissions import IsAdmin
+from .permissions import IsAdmin, ExcludePut
 from .serializers import UserSerializer, AuthSerializer
 from .helpers import send_email, get_confirmation_code
 
@@ -36,10 +36,13 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [
         permissions.IsAuthenticated,
+        ExcludePut,
         IsAdmin,
     ]
     pagination_class = PageNumberPagination
     lookup_field = "username"
+    filter_backends = filters.SearchFilter
+    search_fields = ("username",)
 
 
 # class MeViewSet(generics.RetrieveUpdateAPIView):
@@ -66,7 +69,10 @@ def me(request):
     if request.method == "GET":
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+    if "role" in request.data:
+        del request.data["role"]
     serializer = UserSerializer(request.user, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
+
     serializer.save()
     return Response(serializer.data)

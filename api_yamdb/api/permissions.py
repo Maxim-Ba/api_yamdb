@@ -1,6 +1,13 @@
 from rest_framework.permissions import BasePermission
 
 
+class ExcludePut(BasePermission):
+    message = "PUT запрос не предусмотрен."
+
+    def has_permission(self, request, view):
+        return request.method != "PUT"
+
+
 class IsAdmin(BasePermission):
     message = "Вы не администратор."
 
