@@ -2,7 +2,6 @@ from django.db import models
 from datetime import datetime, timedelta
 import jwt
 
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -95,8 +94,8 @@ class Title(models.Model):
         'Год выпуска произведения'
     )
     genre = models.ManyToManyField(
-        Genres,
-        related_name='titles',
+        Genre,
+        related_name='genres',
         on_delete=models.SET_NULL,
         blank=True
     )
