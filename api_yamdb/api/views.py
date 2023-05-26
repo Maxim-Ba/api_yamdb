@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 
@@ -41,38 +41,20 @@ class UserViewSet(viewsets.ModelViewSet):
     ]
     pagination_class = PageNumberPagination
     lookup_field = "username"
-    filter_backends = filters.SearchFilter
+    filter_backends = (filters.SearchFilter,)
     search_fields = ("username",)
 
+    @action(detail=False, methods=["GET", "PATCH"])
+    def me(self, request):
+        if request.method == "GET":
+            serializer = UserSerializer(request.user)
+            return Response(serializer.data)
+        if "role" in request.data:
+            del request.data["role"]
+            serializer = UserSerializer(
+                request.user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
 
-# class MeViewSet(generics.RetrieveUpdateAPIView):
-#     serializer_class = UserSerializer
-#     lookup_field = "username"
-#     permission_classes = [
-#         permissions.IsAuthenticated,
-#     ]
-#     queryset = User.objects.all()
-
-
-#     @action(methods=["GET"], detail=True, url_path="v1/users/me/")
-#     def me(self, username=None):
-#         print("333", self.request.user.get_username())
-#         # user = get_object_or_404(User, username=self.request.user)
-#         username = self.request.user.get_username
-#         return self.retrieve(self.request, username=username)
-@api_view(
-    ["GET", "PATCH"],
-)
-def me(request):
-    if not request.user.is_authenticated:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-    if request.method == "GET":
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
-    if "role" in request.data:
-        del request.data["role"]
-    serializer = UserSerializer(request.user, data=request.data, partial=True)
-    serializer.is_valid(raise_exception=True)
-
-    serializer.save()
-    return Response(serializer.data)
+            serializer.save()
+            return Response(serializer.data)
