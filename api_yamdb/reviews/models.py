@@ -91,12 +91,11 @@ class Title(models.Model):
         max_length=300
     )
     year = models.IntegerField(
-        'Год выпуска произведения'
+        'Год выпуска произведе ния'
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='genres',
-        on_delete=models.SET_NULL,
+        related_name='genre',
         blank=True
     )
     category = models.ForeignKey(
