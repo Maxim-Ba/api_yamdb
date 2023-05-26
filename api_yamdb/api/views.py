@@ -14,3 +14,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         pk = self.kwargs.get('title_id')
         review_queryset = get_object_or_404(Title, pk=pk)
         return review_queryset.reviews.all()
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    pass
