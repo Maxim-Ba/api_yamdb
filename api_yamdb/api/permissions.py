@@ -1,11 +1,16 @@
 from rest_framework.permissions import BasePermission
+from .exceptions import GenericAPIException
 
 
 class ExcludePut(BasePermission):
     message = "PUT запрос не предусмотрен."
 
     def has_permission(self, request, view):
-        return request.method != "PUT"
+        if request.method == "PUT":
+            raise GenericAPIException(
+                detail="PUT запрос не предусмотрен.", status_code=405
+            )
+        return True
 
 
 class IsAdmin(BasePermission):

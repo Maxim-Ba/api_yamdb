@@ -15,6 +15,10 @@ def signup(request):
     serializer = AuthSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         send_email(request.data["email"], request.data["email"])
+        if User.objects.filter(
+            email=request.data["email"], username=request.data["username"]
+        ).exists():
+            return Response(serializer.data, status=status.HTTP_200_OK)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 

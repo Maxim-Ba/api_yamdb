@@ -19,13 +19,15 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         model = User
 
-        def validate_username(self, value):
-            return _validate_username(self, value)
+    def validate_username(self, value):
+        print("_validate_username(", value)
 
-        def validate_email(self, value):
-            return _validate_email(self, value)
+        return _validate_username(value)
 
-        # def validate_role(self, value):
+    def validate_email(self, value):
+        return _validate_email(value)
+
+    # def validate_role(self, value):
 
 
 class AuthSerializer(serializers.ModelSerializer):
@@ -35,26 +37,48 @@ class AuthSerializer(serializers.ModelSerializer):
             "email",
         )
         model = User
+        validators = []
+        extra_kwargs = {
+            "username": {
+                "validators": [],
+            },
+            "email": {
+                "validators": [],
+            },
+        }
 
     def validate_username(self, value):
-        return _validate_username(self, value)
+        print(self)
+        return _validate_username(value)
 
     def validate_email(self, value):
-        return _validate_email(self, value)
+        return _validate_email(value)
+
+    def validate(self, data):
+        email = data["email"]
+        username = data["username"]
+        qs = User.objects.filter(email=email)
+        if qs.exists():
+            if not qs.filter(username=username).exists():
+                raise ValidationError("У email другой username.")
+        qs = User.objects.filter(username=username)
+        if qs.exists():
+            if not qs.filter(email=email).exists():
+                raise ValidationError("У email другой username.")
+        return data
 
 
-def _validate_username(self, value):
+def _validate_username(value):
     if value.lower() == "me":
         raise ValidationError(detail="Данное имя запрещено")
-    pattern = re.compile(r"^[\w.@+-]+$")
-    if not pattern.match(value):
+    if not re.match(r"^[\w.@+-]+$", value):
         raise ValidationError(
             detail="Можно использовать латинские символы, цифры, @, +, -"
         )
     return value
 
 
-def _validate_email(self, value):
+def _validate_email(value):
     if validate_email(value.lower()):
         raise ValidationError(detail="Не корректный емайл")
     return value
