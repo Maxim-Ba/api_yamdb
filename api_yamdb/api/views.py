@@ -60,12 +60,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == "GET":
             serializer = UserSerializer(request.user)
             return Response(serializer.data)
-        if "role" in request.data:
-            request.data["role"] = request.user.role
         serializer = UserSerializer(
             request.user, data=request.data, partial=True
         )
         serializer.is_valid(raise_exception=True)
 
+        if "role" in request.data:
+            serializer.validated_data["role"] = request.user.role
         serializer.save()
         return Response(serializer.data)

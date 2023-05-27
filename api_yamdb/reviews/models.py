@@ -2,8 +2,6 @@ from rest_framework_simplejwt.tokens import AccessToken
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# from rest_framework.serializers import ValidationError
-from .managers import CustomUserManager
 
 ROLES = (
     ("user", "user"),
@@ -19,7 +17,6 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
     role = models.TextField(choices=ROLES, default="user", null=False)
-    objects = CustomUserManager()
 
     @property
     def token(self):

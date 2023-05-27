@@ -20,14 +20,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
     def validate_username(self, value):
-        print("_validate_username(", value)
-
         return _validate_username(value)
 
     def validate_email(self, value):
         return _validate_email(value)
-
-    # def validate_role(self, value):
 
 
 class AuthSerializer(serializers.ModelSerializer):
