@@ -25,6 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
         def validate_email(self, value):
             return _validate_email(self, value)
 
+        # def validate_role(self, value):
+
 
 class AuthSerializer(serializers.ModelSerializer):
     class Meta:

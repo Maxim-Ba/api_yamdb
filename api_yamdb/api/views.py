@@ -16,18 +16,20 @@ def signup(request):
     if serializer.is_valid(raise_exception=True):
         send_email(request.data["email"], request.data["email"])
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
 def token(request):
-    user = get_object_or_404(User, username=request.data["username"])
+    if "username" in request.data:
+        user = get_object_or_404(User, username=request.data["username"])
 
-    code = get_confirmation_code(user)
-    if code == request.data["confirmation_code"]:
-        return Response({"token": user.token})
+        code = get_confirmation_code(user)
+        if code == request.data["confirmation_code"]:
+            return Response({"token": user.token})
+
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -44,17 +46,22 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ("username",)
 
-    @action(detail=False, methods=["GET", "PATCH"])
+    @action(
+        detail=False,
+        methods=["GET", "PATCH"],
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=UserSerializer,
+    )
     def me(self, request):
         if request.method == "GET":
             serializer = UserSerializer(request.user)
             return Response(serializer.data)
         if "role" in request.data:
-            del request.data["role"]
-            serializer = UserSerializer(
-                request.user, data=request.data, partial=True
-            )
-            serializer.is_valid(raise_exception=True)
+            request.data["role"] = request.user.role
+        serializer = UserSerializer(
+            request.user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
 
-            serializer.save()
-            return Response(serializer.data)
+        serializer.save()
+        return Response(serializer.data)
