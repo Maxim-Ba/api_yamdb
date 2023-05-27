@@ -1,7 +1,10 @@
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.response import Response  # Импортировали класс Response
 from rest_framework.decorators import api_view  # Импортировали декоратор
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import (
+    LimitOffsetPagination,
+    PageNumberPagination
+)
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 
@@ -13,7 +16,8 @@ from .serializers import (
     CategorySerialiser,
     GenreSerialiser,
     ReadTitleSerializer,
-    WriteTitleSerializer
+    WriteTitleSerializer,
+    ReviewSerializer
 )
 from .helpers import send_email, get_confirmation_code
 from .mixins import ListCreateDestroyViewSet
@@ -46,7 +50,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
 
-class CategoriesViewSet(ListCreateDestroyViewSet):
+class CategoryViewSet(ListCreateDestroyViewSet):
     serializer_class = CategorySerialiser
     permission_classes = []  #нужен пермишен "Создавать/ удалять может только администратор, остальные читают"
     pagination_class = LimitOffsetPagination
@@ -55,7 +59,7 @@ class CategoriesViewSet(ListCreateDestroyViewSet):
     lookup_field = 'slug'
 
 
-class GenresViewSet(ListCreateDestroyViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     serializer_class = GenreSerialiser
     permission_classes = []  #нужен пермишен "Создавать/ удалять может только администратор, остальные читают"
     pagination_class = LimitOffsetPagination
@@ -65,7 +69,7 @@ class GenresViewSet(ListCreateDestroyViewSet):
     lookup_field = 'slug'
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = []  #нужен пермишен "Создавать/ удалять может только администратор, остальные читают"
     pagination_class = LimitOffsetPagination
     queryset = Title.objects.annotate(
@@ -78,3 +82,17 @@ class TitlesViewSet(viewsets.ModelViewSet):
         if self.request.method in ['POST', 'PATCH']:
             return WriteTitleSerializer
         return ReadTitleSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        pk = self.kwargs.get('title_id')
+        review_queryset = get_object_or_404(Title, pk=pk)
+        return review_queryset.reviews.all()
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    pass
