@@ -1,5 +1,7 @@
 from pathlib import Path
+from datetime import timedelta
 import environ
+
 
 env = environ.Env()
 environ.Env.read_env()
@@ -18,14 +20,14 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "reviews",
-    "api",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'reviews.apps.ReviewsConfig',
+    'api.apps.ApiConfig'
 ]
 
 MIDDLEWARE = [
@@ -59,6 +61,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "api_yamdb.wsgi.application"
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 15,
+}
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+}
 
 # Database
 
@@ -103,6 +115,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
+
+# AUTH_USER_MODEL = "reviews.User"
+
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = ((BASE_DIR / "static/"),)
@@ -119,5 +137,3 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-CSRF_COOKIE_SECURE = True

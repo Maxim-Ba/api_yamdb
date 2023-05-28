@@ -43,14 +43,14 @@ class AuthSerializer(serializers.ModelSerializer):
         return value
 
 
-class CategorySerialiser(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для категорий"""
     model = Category
     exclude = ('id', )
     lookup_field = 'slug'
 
 
-class GenreSerialiser(serializers.ModelSerializer):
+class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для жанров"""
     model = Genre
     exclude = ('id', )
@@ -92,11 +92,11 @@ class WriteTitleSerializer():
 
 class ReadTitleSerializer():
     """Сериализатор, срабатывающий при методе GET"""
-    genre = GenreSerialiser(
+    genre = GenreSerializer(
         read_only=True,
         many=True
     )
-    category = CategorySerialiser(
+    category = CategorySerializer(
         read_only=True
     )
     rating = serializers.IntegerField(

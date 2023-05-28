@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from datetime import datetime, timedelta
 import jwt
@@ -95,12 +96,13 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='genre',
-        blank=True
+        through='TitleGenre'
     )
     category = models.ForeignKey(
         Category,
         related_name='category',
+        blank=True,
+        null=True,
         on_delete=models.SET_NULL
     )
 
@@ -108,7 +110,21 @@ class Title(models.Model):
         return self.name
 
 
+class TitleGenre(models.Model):
+    """Промежуточная модель произведений и жанров"""
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE
+    )
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+
 class Review(models.Model):
+    """Модель отзывов"""
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -149,11 +165,12 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель комментариев"""
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='comments',
-        verbose_name='Отзыв'
+        verbose_name='Отзыв',
     )
     text = models.TextField(
         verbose_name='Текст'

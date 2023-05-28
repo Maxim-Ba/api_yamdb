@@ -13,8 +13,8 @@ from .permissions import IsAdmin
 from .serializers import (
     UserSerializer,
     AuthSerializer,
-    CategorySerialiser,
-    GenreSerialiser,
+    CategorySerializer,
+    GenreSerializer,
     ReadTitleSerializer,
     WriteTitleSerializer,
     ReviewSerializer
@@ -51,26 +51,17 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
-    serializer_class = CategorySerialiser
-    permission_classes = []  #нужен пермишен "Создавать/ удалять может только администратор, остальные читают"
-    pagination_class = LimitOffsetPagination
-    queryset = Category.objects.all()
-    search_fields = ('name',)
-    lookup_field = 'slug'
+    queryset = Category.objects.all().order_by('name')
+    serializer_class = CategorySerializer
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
-    serializer_class = GenreSerialiser
-    permission_classes = []  #нужен пермишен "Создавать/ удалять может только администратор, остальные читают"
-    pagination_class = LimitOffsetPagination
-    queryset = Genre.objects.all()
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('name',)
-    lookup_field = 'slug'
+    queryset = Genre.objects.all().order_by('name')
+    serializer_class = GenreSerializer
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    permission_classes = []  #нужен пермишен "Создавать/ удалять может только администратор, остальные читают"
+    permission_classes = [IsAdmin]
     pagination_class = LimitOffsetPagination
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')).all()
