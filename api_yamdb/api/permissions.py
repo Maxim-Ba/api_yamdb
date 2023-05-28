@@ -1,0 +1,40 @@
+from rest_framework.permissions import BasePermission
+from .exceptions import GenericAPIException
+
+
+class ExcludePut(BasePermission):
+    message = "PUT запрос не предусмотрен."
+
+    def has_permission(self, request, view):
+        if request.method == "PUT":
+            raise GenericAPIException(
+                detail="PUT запрос не предусмотрен.", status_code=405
+            )
+        return True
+
+
+class IsAdmin(BasePermission):
+    message = "Вы не администратор."
+
+    def has_permission(self, request, view):
+        return request.user and (
+            (request.user.is_authenticated and request.user.role == "admin")
+            or request.user.is_superuser
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.role == "admin" or request.user.is_superuser
+
+
+class IsModerator(BasePermission):
+    message = "Вы не модератор."
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == "moderator"
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.role == "moderator"
