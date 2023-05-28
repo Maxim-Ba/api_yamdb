@@ -1,11 +1,39 @@
+from rest_framework import routers
 from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.routers import DefaultRouter
 
-from .views import UserViewSet, signup, token, CommentViewSet, ReviewViewSet
+from .views import (
+    UserViewSet,
+    signup,
+    token,
+    CategoryViewSet,
+    GenreViewSet,
+    TitleViewSet,
+    ReviewViewSet,
+    CommentViewSet
+)
 
-router_v1 = DefaultRouter()
-router_v1.register(r'users', UserViewSet, basename='users')
+router_v1 = routers.SimpleRouter()
+
+router_v1.register(
+    r"users",
+    UserViewSet,
+    basename="users"
+)
+router_v1.register(
+    r"categories",
+    CategoryViewSet,
+    basename="categories"
+)
+router_v1.register(
+    r"genres",
+    GenreViewSet,
+    basename="genres"
+)
+router_v1.register(
+    'titles',
+    TitleViewSet,
+    'titles')
 router_v1.register(
     r'titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet,
