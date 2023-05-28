@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 from .exceptions import GenericAPIException
 
 
@@ -38,3 +38,20 @@ class IsModerator(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return request.user.role == "moderator"
+
+
+class IsAdminModeratorOrReadOnly(BasePermission):
+    """
+    Разрешено только аутентифицированным пользователям выполнять действия,
+    кроме методов GET, HEAD и OPTIONS, которые разрешены для всех.
+    """
+    def has_object_permission(self, request, view, obj):
+        return (request.method in SAFE_METHODS
+                or request.user.role == 'admin'
+                or request.user.role == 'moderator'
+                or obj.author == request.user)
+
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user and request.user.is_authenticated
