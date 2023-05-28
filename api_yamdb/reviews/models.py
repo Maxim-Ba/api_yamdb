@@ -1,4 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import UniqueConstraint
+from rest_framework_simplejwt.tokens import AccessToken
 from django.db import models
 from datetime import datetime, timedelta
 import jwt
@@ -38,15 +40,8 @@ class User(AbstractUser):
         Генерирует веб-токен JSON, в котором хранится идентификатор этого
         пользователя, срок действия токена составляет 1 день от создания
         """
-        dt = datetime.now() + timedelta(days=1)
-
-        token = jwt.encode(
-            {"id": self.pk, "exp": int(dt.timestamp())},
-            settings.SECRET_KEY,
-            algorithm="HS256",
-        )
-
-        return token.encode("utf-8")
+        access = AccessToken.for_user(self)
+        return str(access)
 
 
 class Category(models.Model):
@@ -124,7 +119,6 @@ class TitleGenre(models.Model):
 
 
 class Review(models.Model):
-    """Модель отзывов"""
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -165,12 +159,11 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    """Модель комментариев"""
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='comments',
-        verbose_name='Отзыв',
+        verbose_name='Отзыв'
     )
     text = models.TextField(
         verbose_name='Текст'

@@ -44,7 +44,6 @@ router_v1.register(
     basename='comments'
 )
 
-
 urlpatterns = [
     path("v1/", include(router_v1.urls)),
     path("v1/auth/signup/", csrf_exempt(signup)),

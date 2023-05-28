@@ -3,6 +3,7 @@ import datetime as dt
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from django.core.validators import validate_email
 
 from reviews.models import User, Category, Genre, Title, Comment, Review
@@ -87,19 +88,21 @@ def _validate_email(value):
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для категорий"""
-    model = Category
-    exclude = ('id', )
-    lookup_field = 'slug'
+    class Meta:
+        model = Category
+        exclude = ('id', )
+        lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для жанров"""
-    model = Genre
-    exclude = ('id', )
-    lookup_field = 'slug'
+    class Meta:
+        model = Genre
+        exclude = ('id', )
+        lookup_field = 'slug'
 
 
-class WriteTitleSerializer():
+class WriteTitleSerializer(serializers.ModelSerializer):
     """Сериализатор, срабатывающий при методе POST и PATCH"""
     genre = serializers.SlugRelatedField(
         many=True,
@@ -114,15 +117,8 @@ class WriteTitleSerializer():
     )
 
     class Meta:
-        fields = (
-            'id',
-            'name',
-            'year',
-            'description',
-            'genre',
-            'category'
-        )
         model = Title
+        fields = '__all__'
 
     def validate_year(self, value):
         if value > dt.datetime.now().year:
@@ -132,18 +128,14 @@ class WriteTitleSerializer():
         return value
 
 
-class ReadTitleSerializer():
+class ReadTitleSerializer(serializers.ModelSerializer):
     """Сериализатор, срабатывающий при методе GET"""
     genre = GenreSerializer(
-        read_only=True,
-        many=True
+        many=True,
     )
-    category = CategorySerializer(
-        read_only=True
-    )
+    category = CategorySerializer()
     rating = serializers.IntegerField(
-        read_only=True,
-        required=False
+        source='reviews__score__avg', read_only=True
     )
 
     class Meta:
@@ -154,7 +146,7 @@ class ReadTitleSerializer():
             'rating',
             'description',
             'genre',
-            'category'
+            'category',
         )
         model = Title
 
@@ -169,14 +161,25 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    # def validate(self, data):
+    #     request = self.context['request']
+    #     if request.method == 'POST':
+    #         title = data['title']
+    #         if title.reviews.filter(author=request.user).exists():
+    #             raise serializers.ValidationError(
+    #                 'На это произведение вы уже оставляли отзыв.'
+    #             )
+    #     return data
+
     def validate(self, data):
-        request = self.context.get['request']
+        request = self.context['request']
+        author = request.user
+        title_id = self.context['view'].kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_id)
         if request.method == 'POST':
-            title = data['title']
-            if title.reviews.filter(author=request.user).exists():
-                raise serializers.ValidationError(
-                    'На это произведение вы уже оставляли отзыв.'
-                )
+            if Review.objects.filter(title=title, author=author).exists():
+                raise ValidationError(
+                    'На это произведение вы уже оставляли отзыв.')
         return data
 
     class Meta:
