@@ -19,8 +19,8 @@ class User(AbstractUser):
     """Модель юзера"""
     username = models.CharField(max_length=150, unique=True, null=False)
     email = models.EmailField(max_length=254, unique=True, null=False)
-    first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
     role = models.TextField(choices=ROLES, default="user", null=False)
 

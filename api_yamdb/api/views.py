@@ -28,19 +28,25 @@ def signup(request):
     serializer = AuthSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         send_email(request.data["email"], request.data["email"])
+        if User.objects.filter(
+            email=request.data["email"], username=request.data["username"]
+        ).exists():
+            return Response(serializer.data, status=status.HTTP_200_OK)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
 def token(request):
-    user = get_object_or_404(User, username=request.data["username"])
+    if "username" in request.data:
+        user = get_object_or_404(User, username=request.data["username"])
 
-    code = get_confirmation_code(user)
-    if code == request.data["confirmation_code"]:
-        return Response({"token": user.token})
+        code = get_confirmation_code(user)
+        if code == request.data["confirmation_code"]:
+            return Response({"token": user.token})
+
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
