@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 
 from reviews.models import Category, Genre, Review, Title, User
-from .permissions import IsAdmin, IsAuthenticatedOrReadOnly
+from .permissions import IsAdmin, IsAdminModeratorOrReadOnly
 from .serializers import (
     CommentSerializer,
     UserSerializer,
@@ -85,7 +85,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminModeratorOrReadOnly]
 
     def get_queryset(self):
         pk = self.kwargs.get('title_id')
@@ -100,7 +100,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminModeratorOrReadOnly]
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
