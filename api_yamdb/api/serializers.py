@@ -51,6 +51,8 @@ class AuthSerializer(serializers.ModelSerializer):
         return _validate_email(value)
 
     def validate(self, data):
+        """Общая функция валидации email"""
+
         email = data["email"]
         username = data["username"]
         qs = User.objects.filter(email=email)
@@ -65,6 +67,8 @@ class AuthSerializer(serializers.ModelSerializer):
 
 
 def _validate_username(value):
+    """Общая функция валидации username"""
+
     if value.lower() == "me":
         raise ValidationError(detail="Данное имя запрещено")
     if not re.match(r"^[\w.@+-]+$", value):

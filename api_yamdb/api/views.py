@@ -57,6 +57,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer_class=UserSerializer,
     )
     def me(self, request):
+        """view функция на эндройнт /users/me/"""
         if request.method == "GET":
             serializer = UserSerializer(request.user)
             return Response(serializer.data)
