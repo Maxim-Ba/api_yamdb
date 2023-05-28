@@ -6,12 +6,6 @@ from reviews.models import Category, Genre, Review
 from reviews.models import Title, User, Comment, TitleGenre
 
 
-ALREDY_LOADED_ERROR_MESSAGE = """
-Если вам нужно перезагрузить дочерние данные из CSV-файла,
-сначала удалите файл db.sqlite3, чтобы уничтожить базу данных.
-Затем запустите `python manage.py миграция` для новой пустой
-базы данных с таблицами"""
-
 CSV_FILES = [
     'genre.csv',
     'category.csv',
@@ -24,6 +18,7 @@ CSV_FILES = [
 
 SAVED_MESSAGE = 'Данные сохранены'
 NOT_SAVED_MESSAGE = 'Данные по внешнему ключу не найдены'
+
 
 class Command(BaseCommand):
     help = "Загрузка данных из CSV файлов"
