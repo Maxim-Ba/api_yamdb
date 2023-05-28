@@ -38,6 +38,80 @@ class User(AbstractUser):
         return str(access)
 
 
+class Category(models.Model):
+    """Модель категорий произведений"""
+    name = models.CharField(
+        'Категория',
+        max_length=256
+    )
+    slug = models.SlugField(
+        'Слаг',
+        max_length=50,
+        unique=True
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Genre(models.Model):
+    """Модель жанров"""
+    name = models.CharField(
+        'Жанр',
+        max_length=256
+    )
+    slug = models.SlugField(
+        'Слаг',
+        max_length=50,
+        unique=True
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Title(models.Model):
+    """Модель произведений"""
+    name = models.CharField(
+        'Произведение',
+        max_length=256
+    )
+    description = models.CharField(
+        'Описание произведения',
+        max_length=300
+    )
+    year = models.IntegerField(
+        'Год выпуска произведе ния'
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        through='TitleGenre'
+    )
+    category = models.ForeignKey(
+        Category,
+        related_name='category',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class TitleGenre(models.Model):
+    """Промежуточная модель произведений и жанров"""
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE
+    )
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+
 class Review(models.Model):
     title = models.ForeignKey(
         Title,
