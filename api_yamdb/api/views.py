@@ -7,9 +7,17 @@ from rest_framework.pagination import (
 )
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Category, Genre, Review, Title, User
-from .permissions import IsAdmin, IsAdminModeratorOrReadOnly, ExcludePut
+from .permissions import (
+    IsAdmin,
+    IsAdminModeratorOrReadOnly,
+    ExcludePut,
+    IsAdminOrReadOnly
+)
+from .filters import TitleFilter
+
 from .serializers import (
     CommentSerializer,
     UserSerializer,
@@ -87,6 +95,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
+    permission_classes = [IsAdminOrReadOnly]
     queryset = Category.objects.all().order_by("name")
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
@@ -95,21 +104,21 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
+    permission_classes = [IsAdminOrReadOnly]
     queryset = Genre.objects.all().order_by("name")
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name",)
-    lookup_field = "slug"
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdmin]
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     queryset = (
         Title.objects.all().annotate(Avg("reviews__score")).order_by("name")
     )
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("name",)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method in ["POST", "PATCH"]:

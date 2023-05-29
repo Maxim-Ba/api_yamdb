@@ -55,3 +55,11 @@ class IsAdminModeratorOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return request.user and request.user.is_authenticated
+
+
+class IsAdminOrReadOnly(BasePermission):
+    """Доступ на чтение разрешен всем, на изменение - администраторам."""
+    def has_permission(self, request, view):
+        return (request.method in SAFE_METHODS
+                or (request.user.is_authenticated
+                    and request.user.role == 'admin'))

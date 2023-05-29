@@ -31,7 +31,7 @@ router_v1.register(
     basename="genres"
 )
 router_v1.register(
-    'titles',
+    r'titles',
     TitleViewSet,
     'titles')
 router_v1.register(
