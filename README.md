@@ -21,16 +21,33 @@
 - sqlite
 
 ## Установка
-
-- `python -m venv venv` (создание виртуального окружения)
-- `source venv/Scripts/acticate` (активация виртуального окружения)
-- `pip install -r requirements.txt` (установка зависимостей)
-- `cd /api_yamdb` (переходим в проект)
-- `python manage.py runserver` (запуск сервера)
+Склонируйте новый репозиторий на свой компьютер.
+Разверните виртуальное окружение в папке скачанного репозитория с помощью команды: `python -m venv venv`
+Активируйте виртуальное окружение `source venv/Scripts/acticate`
+Установите зависимости из файла requirements.txt с помощью команды: `pip install -r requirements.txt`.
+Запустите сервер `python manage.py runserver`
 
 ## Документация
 
 После запуска `runserver`, можно перейти в [документацию](http://localhost:8000/redoc)
+
+## Примеры запросов через API:
+
+Получить список всех отзывов для указанного произведения:
+[GET] /api/v1//titles/{title_id}/reviews/
+
+Добавить новый отзыв. Пользователь может оставить только один отзыв на произведение:
+[POST] /api/v1//titles/{title_id}/reviews/
+
+Получить отзыв по идентификатору для указанного произведения:
+[GET] /api/v1/titles/{title_id}/reviews/{review_id}/
+
+Частично обновить отзыв по идентификатору:
+[PATCH] /api/v1/titles/{title_id}/reviews/{review_id}/
+
+Удалить отзыв по идентификатору:
+[DELETE] /api/v1/titles/{title_id}/reviews/{review_id}/
+
 
 ## Информацию об авторе проекта
 
