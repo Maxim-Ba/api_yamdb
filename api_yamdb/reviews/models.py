@@ -10,6 +10,8 @@ ROLES = (
     ("moderator", "moderator"),
     ("admin", "admin"),
 )
+MINVALUEVALIDATOR = 1
+MAXVALUEVALIDATOR = 10
 
 
 class User(AbstractUser):
@@ -102,7 +104,9 @@ class Review(models.Model):
         verbose_name="Автор",
     )
     score = models.PositiveSmallIntegerField(
-        validators=(MinValueValidator(1), MaxValueValidator(10)),
+        validators=(
+            MinValueValidator(MINVALUEVALIDATOR),
+            MaxValueValidator(MAXVALUEVALIDATOR)),
         verbose_name="Рейтинг",
     )
     pub_date = models.DateTimeField(
