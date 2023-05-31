@@ -14,7 +14,7 @@ from .permissions import (
     IsAdmin,
     IsAdminModeratorOrReadOnly,
     ExcludePut,
-    IsAdminOrReadOnly
+    IsAdminOrReadOnly,
 )
 from .filters import TitleFilter
 
@@ -35,16 +35,15 @@ from .mixins import ListCreateDestroyViewSet
 @api_view(["POST"])
 def signup(request):
     serializer = AuthSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        send_email(request.data["email"], request.data["email"])
-        if User.objects.filter(
-            email=request.data["email"], username=request.data["username"]
-        ).exists():
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer.save()
+    serializer.is_valid(raise_exception=True)
+    if User.objects.filter(
+        email=request.data["email"], username=request.data["username"]
+    ).exists():
+        send_email(user=User.objects.get(**serializer.data))
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    serializer.save()
+    send_email(user=User.objects.get(**serializer.data))
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])

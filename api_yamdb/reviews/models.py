@@ -5,22 +5,24 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 
-ROLES = (
-    ("user", "user"),
-    ("moderator", "moderator"),
-    ("admin", "admin"),
-)
-MINVALUEVALIDATOR = 1
-MAXVALUEVALIDATOR = 10
-
-
 class User(AbstractUser):
+    USER = "user"
+    MODERATOR = "moderator"
+    ADMIN = "admin"
+    ROLES = (
+        (USER, "user"),
+        (MODERATOR, "moderator"),
+        (ADMIN, "admin"),
+    )
     username = models.CharField(max_length=150, unique=True, null=False)
     email = models.EmailField(max_length=254, unique=True, null=False)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
-    role = models.TextField(choices=ROLES, default="user", null=False)
+    role = models.TextField(choices=ROLES, default=USER, null=False)
+
+    class Meta:
+        ordering = ["-id"]
 
     @property
     def token(self):
@@ -39,8 +41,9 @@ class User(AbstractUser):
         access = AccessToken.for_user(self)
         return str(access)
 
-    class Meta:
-        ordering = ["-id"]
+    @property
+    def is_admin(self):
+        return self.role == self.ADMIN or self.is_superuser
 
 
 class Category(models.Model):
@@ -48,6 +51,9 @@ class Category(models.Model):
 
     name = models.CharField("Категория", max_length=256)
     slug = models.SlugField("Слаг", max_length=50, unique=True)
+
+    class Meta:
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -58,6 +64,9 @@ class Genre(models.Model):
 
     name = models.CharField("Жанр", max_length=256)
     slug = models.SlugField("Слаг", max_length=50, unique=True)
+
+    class Meta:
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -78,6 +87,9 @@ class Title(models.Model):
         on_delete=models.SET_NULL,
     )
 
+    class Meta:
+        ordering = ["-id"]
+
     def __str__(self):
         return self.name
 
@@ -88,8 +100,14 @@ class TitleGenre(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
 
+    class Meta:
+        ordering = ["-id"]
+
 
 class Review(models.Model):
+    MIN_SCORE = 1
+    MAX_SCORE = 10
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -105,8 +123,9 @@ class Review(models.Model):
     )
     score = models.PositiveSmallIntegerField(
         validators=(
-            MinValueValidator(MINVALUEVALIDATOR),
-            MaxValueValidator(MAXVALUEVALIDATOR)),
+            MinValueValidator(MIN_SCORE),
+            MaxValueValidator(MAX_SCORE),
+        ),
         verbose_name="Рейтинг",
     )
     pub_date = models.DateTimeField(

@@ -1,34 +1,23 @@
-import hashlib
-
 from django.conf import settings
 from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
 
 
 def get_confirmation_code(user):
-    """Декодирует код созданый из email."""
+    """Получить confirmation_code для user."""
 
-    m = hashlib.md5()
-    m.update(user.email.encode("utf-8"))
-    return m.hexdigest()
+    return default_token_generator.make_token(user)
 
 
-def create_confirmation_code(value: str):
-    """Создает код используя хеширование md5."""
-
-    m = hashlib.md5()
-    m.update(value.encode("utf-8"))
-    return m.hexdigest()
-
-
-def send_email(email, msg, title="Код регистраци"):
+def send_email(user, title="Код регистраци"):
     """Отправка кода на email при регистрации."""
 
-    code = create_confirmation_code(msg)
+    code = get_confirmation_code(user)
     send_mail(
         title,
         code,
         settings.EMAIL_HOST_USER,
         [
-            email,
+            user.email,
         ],
     )

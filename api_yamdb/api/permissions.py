@@ -1,5 +1,8 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from .exceptions import GenericAPIException
+from rest_framework import status
+
+from reviews.models import User
 
 
 class ExcludePut(BasePermission):
@@ -8,7 +11,8 @@ class ExcludePut(BasePermission):
     def has_permission(self, request, view):
         if request.method == "PUT":
             raise GenericAPIException(
-                detail="PUT запрос не предусмотрен.", status_code=405
+                detail="PUT запрос не предусмотрен.",
+                status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
             )
         return True
 
@@ -18,12 +22,12 @@ class IsAdmin(BasePermission):
 
     def has_permission(self, request, view):
         return request.user and (
-            (request.user.is_authenticated and request.user.role == "admin")
+            (request.user.is_authenticated and request.user.role == User.ADMIN)
             or request.user.is_superuser
         )
 
     def has_object_permission(self, request, view, obj):
-        return request.user.role == "admin" or request.user.is_superuser
+        return request.user.is_admin
 
 
 class IsModerator(BasePermission):
@@ -33,11 +37,11 @@ class IsModerator(BasePermission):
         return (
             request.user
             and request.user.is_authenticated
-            and request.user.role == "moderator"
+            and request.user.role == User.MODERATOR
         )
 
     def has_object_permission(self, request, view, obj):
-        return request.user.role == "moderator"
+        return request.user.role == User.MODERATOR
 
 
 class IsAdminModeratorOrReadOnly(BasePermission):
@@ -45,11 +49,14 @@ class IsAdminModeratorOrReadOnly(BasePermission):
     Разрешено только аутентифицированным пользователям выполнять действия,
     кроме методов GET, HEAD и OPTIONS, которые разрешены для всех.
     """
+
     def has_object_permission(self, request, view, obj):
-        return (request.method in SAFE_METHODS
-                or request.user.role == 'admin'
-                or request.user.role == 'moderator'
-                or obj.author == request.user)
+        return (
+            request.method in SAFE_METHODS
+            or request.user.role == User.ADMIN
+            or request.user.role == User.MODERATOR
+            or obj.author == request.user
+        )
 
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
@@ -59,7 +66,8 @@ class IsAdminModeratorOrReadOnly(BasePermission):
 
 class IsAdminOrReadOnly(BasePermission):
     """Доступ на чтение разрешен всем, на изменение - администраторам."""
+
     def has_permission(self, request, view):
-        return (request.method in SAFE_METHODS
-                or (request.user.is_authenticated
-                    and request.user.role == 'admin'))
+        return request.method in SAFE_METHODS or (
+            request.user.is_authenticated and request.user.role == User.ADMIN
+        )
